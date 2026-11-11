@@ -1,0 +1,22 @@
+{
+  "name": "clon-kings-valley",
+  "description": "King's Valley (Retro MSX 1985) Arcade Platformer Clone in TypeScript + Phaser + Vite",
+  "version": "1.0.0",
+  "type": "module",
+  "author": "Antigravity Agent",
+  "license": "MIT",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "test": "node --experimental-strip-types --test tests/**/*.test.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.0",
+    "typescript": "^5.7.3",
+    "vite": "^6.2.0"
+  },
+  "dependencies": {
+    "phaser": "^3.88.2"
+  }
+}

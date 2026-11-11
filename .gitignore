@@ -1,0 +1,6 @@
+# Local agent configuration
+.agents/
+
+# Dependencies & build output
+node_modules/
+dist/
