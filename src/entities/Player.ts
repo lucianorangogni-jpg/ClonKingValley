@@ -249,11 +249,11 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
             }
         }
 
-        // 5. Comprobar acción de excavar con pico
-        if (input.actionDig && this.pickaxeUses > 0 && hasGround) {
+        // 5. Comprobar acción de excavar con pico (botón pico dedicado, o Espacio/Z si no hay cuchillos)
+        const wantsPickaxe = input.actionDig || (input.actionThrow && this.knivesCount === 0);
+        if (wantsPickaxe && this.pickaxeUses > 0 && hasGround) {
             const digDir = input.down ? DirectionType.Down : this.facing;
-            const success = this.tryStartDigging(digDir);
-            if (success) {
+            if (this.tryStartDigging(digDir)) {
                 return;
             }
         }
@@ -315,33 +315,32 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
      */
     private tryStartDigging(dir: DirectionType): boolean {
         const myTile = this.grid.worldToTile(this.x, this.y - 8);
-        let targetCol = myTile.col;
-        let targetRow = myTile.row;
+        const sign = this.facing === DirectionType.Left ? -1 : 1;
+        const candidates: Array<{ col: number; row: number }> = dir === DirectionType.Down
+            ? [
+                { col: myTile.col, row: myTile.row + 1 },
+                { col: myTile.col + sign, row: myTile.row + 1 }
+            ]
+            : [
+                { col: myTile.col + (dir === DirectionType.Left ? -1 : 1), row: myTile.row },
+                { col: myTile.col + (dir === DirectionType.Left ? -1 : 1), row: myTile.row + 1 },
+                { col: myTile.col + (dir === DirectionType.Left ? -1 : 1), row: myTile.row - 1 },
+                { col: myTile.col, row: myTile.row + 1 }
+            ];
 
-        if (dir === DirectionType.Down) {
-            targetRow = myTile.row + 1; // Cavar el suelo bajo los pies
-        } else if (dir === DirectionType.Left) {
-            targetCol = myTile.col - 1;
-            if (!this.grid.isDiggable(targetCol, targetRow) && this.grid.isDiggable(targetCol, targetRow + 1)) {
-                targetRow = targetRow + 1;
+        for (const candidate of candidates) {
+            if (this.grid.isInteriorDiggable(candidate.col, candidate.row)) {
+                this.playerState = PlayerState.Digging;
+                this.digTimeRemaining = GameConstants.DIG_DURATION_MS;
+                this.digTargetCol = candidate.col;
+                this.digTargetRow = candidate.row;
+                this.setVelocityX(0);
+                this.setVelocityY(0);
+                this.showStaticFrame('player_dig');
+                this.setScale(1.08, 0.94);
+                this.audio.playDig();
+                return true;
             }
-        } else if (dir === DirectionType.Right) {
-            targetCol = myTile.col + 1;
-            if (!this.grid.isDiggable(targetCol, targetRow) && this.grid.isDiggable(targetCol, targetRow + 1)) {
-                targetRow = targetRow + 1;
-            }
-        }
-
-        if (this.grid.isDiggable(targetCol, targetRow)) {
-            this.playerState = PlayerState.Digging;
-            this.digTimeRemaining = GameConstants.DIG_DURATION_MS;
-            this.digTargetCol = targetCol;
-            this.digTargetRow = targetRow;
-            this.setVelocityX(0);
-            this.setVelocityY(0);
-            this.showStaticFrame('player_dig');
-            this.audio.playDig();
-            return true;
         }
         return false;
     }
@@ -358,6 +357,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
             if (brokeCompletely) {
                 this.pickaxeUses--;
             }
+            this.setScale(1, 1);
             this.playerState = PlayerState.Idle;
             this.showStaticFrame('player_idle');
         }

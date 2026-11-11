@@ -341,7 +341,7 @@ export class ChamberGrid {
     }
 
     /**
-     * Comprueba si un bloque es excavable con el pico.
+     * Comprueba si un bloque es arenisca excavable blanda.
      */
     public isDiggable(col: number, row: number): boolean {
         const tile = this.getTile(col, row);
@@ -349,13 +349,33 @@ export class ChamberGrid {
     }
 
     /**
-     * Excava un paso sobre el bloque de arenisca.
-     * Avanza de `DiggableSandstone` -> `DiggableSandstoneCracked` -> `Empty`.
+     * Comprueba si una celda interior puede excavarse con el pico.
+     * Incluye arenisca y bloques de ladrillo interiores (excluyendo muros perimetrales y celdas bajo la puerta).
+     */
+    public isInteriorDiggable(col: number, row: number): boolean {
+        if (this.isDiggable(col, row)) {
+            return true;
+        }
+        const isInterior = col >= 1 && col < this.cols - 1 && row >= 1 && row < this.rows - 1;
+        if (!isInterior) {
+            return false;
+        }
+        const tile = this.getTile(col, row);
+        if (tile !== TileType.SolidWall) {
+            return false;
+        }
+        const aboveTile = this.getTile(col, row - 1);
+        return aboveTile !== TileType.ExitDoorClosed && aboveTile !== TileType.ExitDoorOpen;
+    }
+
+    /**
+     * Excava un paso sobre el bloque objetivo.
+     * Avanza de `SolidWall`/`DiggableSandstone` -> `DiggableSandstoneCracked` -> `Empty`.
      * @returns `true` si el bloque se desintegró por completo abriendo el paso, `false` si quedó agrietado.
      */
     public digBlock(col: number, row: number): boolean {
         const current = this.getTile(col, row);
-        if (current === TileType.DiggableSandstone) {
+        if (current === TileType.DiggableSandstone || (current === TileType.SolidWall && this.isInteriorDiggable(col, row))) {
             this.setTile(col, row, TileType.DiggableSandstoneCracked);
             return false;
         } else if (current === TileType.DiggableSandstoneCracked) {

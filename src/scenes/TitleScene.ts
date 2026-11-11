@@ -100,7 +100,7 @@ export class TitleScene extends Phaser.Scene {
         });
 
         // Controles y guía rápida inferior
-        this.add.text(width / 2, 490, "LEFT/RIGHT OR 1-3: SELECT PYRAMID   |   ARROWS / WASD TO MOVE & CLIMB\nSPACE TO THROW KNIFE   |   DOWN + SPACE / X TO DIG", {
+        this.add.text(width / 2, 490, "LEFT/RIGHT OR 1-3: SELECT PYRAMID   |   ARROWS / WASD TO MOVE & CLIMB\nSPACE / Z TO THROW KNIFE   |   X / C / SHIFT / DOWN+SPACE TO DIG WITH PICKAXE", {
             fontFamily: '"Courier New", monospace',
             fontSize: '13px',
             color: MSXPalette.GRAY,

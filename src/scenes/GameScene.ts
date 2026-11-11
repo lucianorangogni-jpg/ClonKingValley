@@ -378,7 +378,10 @@ export class GameScene extends Phaser.Scene {
             this.spawnDust(pos.x, pos.y);
         } else if (newType === TileType.DiggableSandstoneCracked) {
             if (existing) {
-                existing.setTexture('tile_diggable_cracked');
+                const nextTexture = existing.texture.key === 'tile_solid'
+                    ? 'tile_solid_cracked'
+                    : 'tile_diggable_cracked';
+                existing.setTexture(nextTexture);
             }
             const pos = this.grid.tileToWorld(c, r);
             this.spawnDust(pos.x, pos.y);

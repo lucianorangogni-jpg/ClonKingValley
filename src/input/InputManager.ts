@@ -32,13 +32,14 @@ export class InputManager {
     private keyD: Phaser.Input.Keyboard.Key | null = null;
     private keySpace: Phaser.Input.Keyboard.Key | null = null;
     private keyX: Phaser.Input.Keyboard.Key | null = null;
+    private keyC: Phaser.Input.Keyboard.Key | null = null;
+    private keyShift: Phaser.Input.Keyboard.Key | null = null;
     private keyZ: Phaser.Input.Keyboard.Key | null = null;
     private keyR: Phaser.Input.Keyboard.Key | null = null;
     private keyM: Phaser.Input.Keyboard.Key | null = null;
 
     // Control de pulsaciones discretas (just pressed) para acciones que no deben repetirse cada tick
     private lastSpaceState: boolean = false;
-    private lastXState: boolean = false;
 
     /**
      * Construye el gestor de controles para la escena.
@@ -54,6 +55,8 @@ export class InputManager {
             this.keyD = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D);
             this.keySpace = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
             this.keyX = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.X);
+            this.keyC = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.C);
+            this.keyShift = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SHIFT);
             this.keyZ = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.Z);
             this.keyR = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.R);
             this.keyM = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.M);
@@ -70,15 +73,18 @@ export class InputManager {
         const down = (this.cursors?.down.isDown ?? false) || (this.keyS?.isDown ?? false) || this.isPadDown();
 
         const spaceIsDown = (this.keySpace?.isDown ?? false) || (this.keyZ?.isDown ?? false) || this.isPadButton(0);
-        const xIsDown = (this.keyX?.isDown ?? false) || this.isPadButton(2);
+        const pickKeyIsDown =
+            (this.keyX?.isDown ?? false) ||
+            (this.keyC?.isDown ?? false) ||
+            (this.keyShift?.isDown ?? false) ||
+            this.isPadButton(2);
 
-        // Detectar pulsación inicial para lanzar cuchillo
+        // Detectar pulsación inicial para lanzar cuchillo (o usar pico si no hay cuchillos)
         const actionThrowJustPressed = spaceIsDown && !this.lastSpaceState;
-        // Cavar con tecla de acción o cuando se mantiene pulsado hacia un bloque
-        const actionDig = xIsDown || (spaceIsDown && down);
+        // Cavar con tecla dedicada de pico (X / C / Shift) o con Abajo + Espacio/Z
+        const actionDig = pickKeyIsDown || (spaceIsDown && down);
 
         this.lastSpaceState = spaceIsDown;
-        this.lastXState = xIsDown;
 
         return {
             left,

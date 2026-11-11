@@ -109,4 +109,29 @@ describe('ChamberGrid Logic and Mechanics', () => {
         assert.equal(info.topY, grid.tileTopY(2));
         assert.equal(info.bottomY, grid.tileTopY(5));
     });
+
+    it('should allow pickaxe digging of interior solid walls while protecting borders and exit floor', () => {
+        const grid = new ChamberGrid(10, 10, 25);
+        grid.setTile(0, 5, TileType.SolidWall);
+        grid.setTile(9, 5, TileType.SolidWall);
+        grid.setTile(5, 0, TileType.SolidWall);
+        grid.setTile(5, 9, TileType.SolidWall);
+        grid.setTile(4, 5, TileType.SolidWall);
+        grid.setTile(7, 7, TileType.ExitDoorClosed);
+        grid.setTile(7, 8, TileType.SolidWall);
+
+        // Perimeter walls and brick supporting ExitDoor cannot be dug
+        assert.equal(grid.isInteriorDiggable(0, 5), false);
+        assert.equal(grid.isInteriorDiggable(9, 5), false);
+        assert.equal(grid.isInteriorDiggable(5, 0), false);
+        assert.equal(grid.isInteriorDiggable(5, 9), false);
+        assert.equal(grid.isInteriorDiggable(7, 8), false);
+
+        // Interior pyramid brick can be dug in 2 strikes
+        assert.equal(grid.isInteriorDiggable(4, 5), true);
+        assert.equal(grid.digBlock(4, 5), false);
+        assert.equal(grid.getTile(4, 5), TileType.DiggableSandstoneCracked);
+        assert.equal(grid.digBlock(4, 5), true);
+        assert.equal(grid.getTile(4, 5), TileType.Empty);
+    });
 });

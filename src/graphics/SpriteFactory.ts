@@ -220,6 +220,33 @@ export class SpriteFactory {
             ctx.fillRect(17, 19, 3, 5);
         });
 
+        // 3b. Ladrillo dorado de pirámide agrietado al recibir el primer golpe de pico
+        this.createCanvasTexture('tile_solid_cracked', size, size, (ctx) => {
+            ctx.fillStyle = '#c87e22';
+            ctx.fillRect(0, 0, size, size);
+
+            ctx.fillStyle = '#f2c864';
+            ctx.fillRect(0, 0, size - 1, 3);
+            ctx.fillRect(0, 0, 3, size - 1);
+
+            ctx.fillStyle = '#5a2d0c';
+            ctx.fillRect(1, size - 3, size - 1, 3);
+            ctx.fillRect(size - 3, 1, 3, size - 1);
+
+            ctx.fillStyle = '#925418';
+            ctx.fillRect(5, 5, size - 10, size - 10);
+
+            // Grieta diagonal negra tras el primer picotazo
+            ctx.fillStyle = MSXPalette.BLACK;
+            ctx.fillRect(4, 2, 3, 4);
+            ctx.fillRect(7, 6, 4, 4);
+            ctx.fillRect(11, 10, 4, 4);
+            ctx.fillRect(14, 14, 4, 5);
+            ctx.fillRect(17, 19, 4, 5);
+            ctx.fillRect(0, size - 1, size, 1);
+            ctx.fillRect(size - 1, 0, 1, size);
+        });
+
         // 4. Escalera vertical clásica (respaldo si hay tramos verticales de 1 columna)
         this.createCanvasTexture('tile_ladder', size, size, (ctx) => {
             ctx.fillStyle = MSXPalette.LIGHT_YELLOW;

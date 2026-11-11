@@ -36,7 +36,7 @@ export class GameConstants {
     public static readonly GRAVITY = 600; // Aceleración de caída
     public static readonly MAX_FALL_SPEED = 380; // Velocidad terminal de caída
     public static readonly INITIAL_LIVES = 3;
-    public static readonly DIG_DURATION_MS = 600; // Tiempo en milisegundos para excavar un bloque
+    public static readonly DIG_DURATION_MS = 260; // Tiempo en milisegundos por golpe de pico
     public static readonly KNIFE_SPEED = 300; // Velocidad de vuelo del cuchillo arrojadizo
     public static readonly KNIFE_MAX_RANGE = 420; // Distancia máxima antes de caer al suelo
 

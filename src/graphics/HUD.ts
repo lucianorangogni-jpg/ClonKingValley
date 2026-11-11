@@ -88,8 +88,8 @@ export class HUD {
             color: MSXPalette.WHITE
         }).setOrigin(0.5).setDepth(21);
 
-        // Línea 3 compacta con inventario y gemas restantes
-        this.statusText = this.scene.add.text(width / 2, 60, 'GEMS: 0   PICK: 0   KNIFE: 0', {
+        // Línea 3 compacta con inventario, gemas restantes y tecla de pico
+        this.statusText = this.scene.add.text(width / 2, 60, 'GEMS: 0   PICK [X/C/SHIFT]: 0   KNIFE [SPACE]: 0', {
             fontFamily: '"Courier New", monospace',
             fontSize: '12px',
             fontStyle: 'bold',
@@ -109,7 +109,7 @@ export class HUD {
         this.scoreText.setText(`SCORE-${scoreStr} HI-${hiScoreStr} REST-${restStr}`);
         this.stageText.setText(`PYRAMID-${stageStr}`);
         this.statusText.setText(
-            `GEMS: ${Math.max(0, data.gemsRemaining)}   PICK: ${data.pickaxeUses}   KNIFE: ${data.knivesCount}`
+            `GEMS: ${Math.max(0, data.gemsRemaining)}   PICK [X/C/SHIFT]: ${data.pickaxeUses}   KNIFE [SPACE]: ${data.knivesCount}`
         );
     }
 
