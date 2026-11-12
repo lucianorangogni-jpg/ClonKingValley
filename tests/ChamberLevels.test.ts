@@ -24,7 +24,7 @@ describe('ChamberLevels Design Validation', () => {
         ]);
     });
 
-    for (let stage = 1; stage <= 3; stage++) {
+    for (let stage = 1; stage <= 5; stage++) {
         it(`should have complete and valid 32x21 structure for Stage ${stage}`, () => {
             const level = ChamberLevels.getLevel(stage);
 
@@ -66,4 +66,15 @@ describe('ChamberLevels Design Validation', () => {
             assert.ok(totalLadderTiles >= 10, `Stage ${stage} must have functional staircases`);
         });
     }
+
+    it('should provide distinct platform architectures across stages 1 to 5', () => {
+        const signatures = new Set<string>();
+        for (let stage = 1; stage <= 5; stage++) {
+            const level = ChamberLevels.getLevel(stage);
+            const sig = level.layout.map((row) => row.join(',')).join('|');
+            assert.equal(signatures.has(sig), false, `Stage ${stage} must not repeat an earlier chamber layout`);
+            signatures.add(sig);
+        }
+        assert.equal(signatures.size, 5);
+    });
 });

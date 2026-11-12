@@ -100,7 +100,7 @@ export class TitleScene extends Phaser.Scene {
         });
 
         // Controles y guía rápida inferior
-        this.add.text(width / 2, 490, "LEFT/RIGHT OR 1-3: SELECT PYRAMID   |   ARROWS / WASD TO MOVE & CLIMB\nSPACE / Z TO THROW KNIFE   |   X / C / SHIFT / DOWN+SPACE TO DIG WITH PICKAXE", {
+        this.add.text(width / 2, 490, "LEFT/RIGHT OR 1-5: SELECT PYRAMID   |   ARROWS / WASD TO MOVE & CLIMB\nSPACE / Z TO THROW KNIFE   |   X / C / SHIFT / DOWN+SPACE TO DIG WITH PICKAXE", {
             fontFamily: '"Courier New", monospace',
             fontSize: '13px',
             color: MSXPalette.GRAY,
@@ -113,13 +113,15 @@ export class TitleScene extends Phaser.Scene {
         this.input.keyboard?.on('keydown-ONE', () => this.setStage(1));
         this.input.keyboard?.on('keydown-TWO', () => this.setStage(2));
         this.input.keyboard?.on('keydown-THREE', () => this.setStage(3));
+        this.input.keyboard?.on('keydown-FOUR', () => this.setStage(4));
+        this.input.keyboard?.on('keydown-FIVE', () => this.setStage(5));
         this.input.keyboard?.on('keydown-SPACE', () => this.startGame());
         this.input.keyboard?.on('keydown-ENTER', () => this.startGame());
         this.input.on('pointerdown', () => this.startGame());
     }
 
     private changeStage(delta: number): void {
-        const next = ((this.selectedStage - 1 + delta + 3) % 3) + 1;
+        const next = ((this.selectedStage - 1 + delta + 5) % 5) + 1;
         this.setStage(next);
     }
 

@@ -104,7 +104,9 @@ export class ChamberLevels {
         const levels = [
             ChamberLevels.createChamber1(),
             ChamberLevels.createChamber2(),
-            ChamberLevels.createChamber3()
+            ChamberLevels.createChamber3(),
+            ChamberLevels.createChamber4(),
+            ChamberLevels.createChamber5()
         ];
         const index = (stage - 1) % levels.length;
         const base = levels[index];
@@ -232,73 +234,85 @@ export class ChamberLevels {
     }
 
     /**
-     * PYRAMID-01: Vestíbulo de entrada en cuadrícula 32x21 adaptado a la estética MSX de referencia.
+     * PYRAMID-01: Vestíbulo de terrazas escalonadas y altar hundido central (cuadrícula 32x21).
      */
     private static createChamber1(): ChamberData {
         const m = ChamberLevels.createEmptyReferenceMatrix();
         const diggable: Array<{ col: number; row: number }> = [];
 
-        // Plataforma inferior-media (row 16)
-        for (let c = 1; c <= 30; c++) m[16][c] = 1;
-        // Plataforma central (row 11)
-        for (let c = 3; c <= 28; c++) m[11][c] = 1;
-        // Plataforma superior (row 6)
-        for (let c = 5; c <= 26; c++) m[6][c] = 1;
+        // Terrazas inferiores escalonadas (izq en fila 16, der en fila 15)
+        for (let c = 1; c <= 12; c++) m[16][c] = 1;
+        for (let c = 19; c <= 30; c++) m[15][c] = 1;
 
-        // Muros de ladrillo rosado excavable
-        for (const r of [14, 15]) {
-            for (const c of [10, 11]) {
-                m[r][c] = 1;
-                diggable.push({ col: c, row: r });
-            }
-        }
-        for (const c of [15, 16]) {
-            m[11][c] = 1;
-            diggable.push({ col: c, row: 11 });
-        }
-        for (const c of [20, 21]) {
-            m[6][c] = 1;
-            diggable.push({ col: c, row: 6 });
+        // Altar central hundido en la base (techo en fila 18, paredes laterales excavables en fila 19)
+        for (let c = 13; c <= 18; c++) m[18][c] = 1;
+        for (const c of [13, 18]) {
+            m[19][c] = 1;
+            diggable.push({ col: c, row: 19 });
         }
 
-        // Escaleras diagonales de 2 columnas (conectando piso base hasta plataforma superior)
-        ChamberLevels.addDiagonalStair(m, 5, 16, 19, 1);   // Base (row 20) <-> row 16
-        ChamberLevels.addDiagonalStair(m, 22, 11, 15, -1); // row 16 <-> row 11
-        ChamberLevels.addDiagonalStair(m, 7, 6, 10, 1);    // row 11 <-> row 6
-        ChamberLevels.addDiagonalStair(m, 23, 16, 19, -1); // Acceso lateral inferior
+        // Puente central (fila 12) y balcones laterales (fila 10)
+        for (let c = 9; c <= 22; c++) m[12][c] = 1;
+        for (let c = 1; c <= 7; c++) m[10][c] = 1;
+        for (let c = 24; c <= 30; c++) m[10][c] = 1;
 
-        // Coleccionables (4)
-        m[19][14] = 4; // Gema rosa en piso inferior
-        m[15][6] = 4;  // Gema verde
-        m[10][14] = 4; // Gema azul
-        m[5][10] = 4;  // Gema amarilla
-        m[15][18] = 4; // Pico
-        m[10][24] = 4; // Pico
-        m[15][4] = 4;  // Cuchillo
-        m[5][22] = 4;  // Cuchillo
+        // Terrazas superiores asimétricas (izq en fila 6, salida der en fila 5)
+        for (let c = 1; c <= 13; c++) m[6][c] = 1;
+        for (let c = 18; c <= 30; c++) m[5][c] = 1;
+
+        // Bloques rosados excavables en balcones y puente
+        for (const cell of [
+            { col: 15, row: 12 }, { col: 16, row: 12 },
+            { col: 5, row: 6 }, { col: 6, row: 6 }
+        ]) {
+            m[cell.row][cell.col] = 1;
+            diggable.push(cell);
+        }
+
+        // Escaleras diagonales de 2 columnas conectando todas las terrazas
+        ChamberLevels.addDiagonalStair(m, 9, 16, 19, -1);  // Base <-> terraza inf-izq
+        ChamberLevels.addDiagonalStair(m, 21, 15, 19, 1);  // Base <-> terraza inf-der
+        ChamberLevels.addDiagonalStair(m, 2, 10, 15, 1);   // Inf-izq <-> balcón izq
+        ChamberLevels.addDiagonalStair(m, 27, 10, 14, -1); // Inf-der <-> balcón der
+        ChamberLevels.addDiagonalStair(m, 11, 12, 15, -1); // Inf-izq <-> puente central
+        ChamberLevels.addDiagonalStair(m, 18, 12, 14, 1);  // Inf-der <-> puente central
+        ChamberLevels.addDiagonalStair(m, 7, 6, 11, 1);    // Puente central <-> sup-izq
+        ChamberLevels.addDiagonalStair(m, 21, 5, 11, -1);  // Puente central <-> sup-der
+
+        // Coleccionables
+        m[19][15] = 4; // Gema rosa dentro del altar central
+        m[9][2] = 4;   // Gema verde en balcón izq
+        m[9][28] = 4;  // Gema azul en balcón der
+        m[5][3] = 4;   // Gema amarilla en terraza sup-izq
+        m[15][8] = 4;  // Pico en terraza inf-izq
+        m[14][20] = 4; // Pico en terraza inf-der
+        m[11][15] = 4; // Pico en puente central
+        m[19][28] = 4; // Cuchillo en suelo inf-der
+        m[5][8] = 4;   // Cuchillo en terraza sup-izq
 
         return ChamberLevels.parseReferenceMatrix(m, {
             stage: 1,
             name: 'PYRAMID-01 - THE VESTIBULE',
             playerSpawn: { col: 3, row: 15 },
-            exitDoor: { col: 25, row: 5 },
+            exitDoor: { col: 28, row: 4 },
             diggableCells: diggable,
             itemKinds: {
-                '14,19': { kind: 'gem', gemColor: 'pink' },
-                '6,15': { kind: 'gem', gemColor: 'green' },
-                '14,10': { kind: 'gem', gemColor: 'blue' },
-                '10,5': { kind: 'gem', gemColor: 'yellow' },
-                '18,15': { kind: 'pickaxe' },
-                '24,10': { kind: 'pickaxe' },
-                '4,15': { kind: 'knife' },
-                '22,5': { kind: 'knife' }
+                '15,19': { kind: 'gem', gemColor: 'pink' },
+                '2,9': { kind: 'gem', gemColor: 'green' },
+                '28,9': { kind: 'gem', gemColor: 'blue' },
+                '3,5': { kind: 'gem', gemColor: 'yellow' },
+                '8,15': { kind: 'pickaxe' },
+                '20,14': { kind: 'pickaxe' },
+                '15,11': { kind: 'pickaxe' },
+                '28,19': { kind: 'knife' },
+                '8,5': { kind: 'knife' }
             },
             extraMummies: [
-                { col: 26, row: 15, type: 'white' },
-                { col: 18, row: 10, type: 'yellow' }
+                { col: 26, row: 14, type: 'white' },
+                { col: 17, row: 11, type: 'yellow' }
             ],
             movingFloors: [
-                { col: 10, row: 11, length: 4, direction: 'left', speed: 70 }
+                { col: 14, row: 12, length: 4, direction: 'left', speed: 70 }
             ]
         });
     }
@@ -338,70 +352,245 @@ export class ChamberLevels {
     }
 
     /**
-     * PYRAMID-03: Laberinto de Anubis en cuadrícula 32x21 con cintas transportadoras y momias rojas.
+     * PYRAMID-03: Tres torres verticales con cámara sellada central y muros divisorios excavables.
      */
     private static createChamber3(): ChamberData {
         const m = ChamberLevels.createEmptyReferenceMatrix();
         const diggable: Array<{ col: number; row: number }> = [];
 
-        for (let c = 1; c <= 30; c++) m[16][c] = 1;
-        for (let c = 2; c <= 29; c++) m[12][c] = 1;
-        for (let c = 4; c <= 27; c++) m[8][c] = 1;
-        for (let c = 2; c <= 29; c++) m[4][c] = 1;
+        // Torre izquierda
+        for (let c = 1; c <= 9; c++) m[16][c] = 1;
+        for (let c = 1; c <= 10; c++) m[11][c] = 1;
+        for (let c = 1; c <= 8; c++) m[6][c] = 1;
 
-        // Cajas centrales excavables
-        for (const c of [15, 16]) {
-            m[16][c] = 1;
-            m[12][c] = 1;
-            diggable.push({ col: c, row: 16 }, { col: c, row: 12 });
-        }
-        for (const c of [10, 11, 20, 21]) {
-            m[8][c] = 1;
-            diggable.push({ col: c, row: 8 });
+        // Muro divisorio inferior-izquierdo (col 10, filas 12..19) con paso excavable abajo
+        for (let r = 12; r <= 19; r++) {
+            m[r][10] = 1;
+            if (r >= 18) diggable.push({ col: 10, row: r });
         }
 
-        ChamberLevels.addDiagonalStair(m, 4, 16, 19, 1);
-        ChamberLevels.addDiagonalStair(m, 25, 16, 19, -1);
-        ChamberLevels.addDiagonalStair(m, 8, 12, 15, -1);
-        ChamberLevels.addDiagonalStair(m, 21, 8, 11, 1);
-        ChamberLevels.addDiagonalStair(m, 14, 4, 7, -1);
+        // Ciudadela central con bóveda sellada arriba (fila 4..8)
+        for (let c = 12; c <= 20; c++) m[14][c] = 1;
+        for (let c = 11; c <= 21; c++) m[8][c] = 1;
+        for (let c = 12; c <= 20; c++) m[4][c] = 1;
+        for (let r = 5; r <= 7; r++) {
+            m[r][11] = 1;
+            m[r][21] = 1;
+            if (r === 7) {
+                diggable.push({ col: 11, row: r }, { col: 21, row: r });
+            }
+        }
 
-        m[19][15] = 4;
-        m[15][27] = 4;
-        m[11][4] = 4;
-        m[7][18] = 4;
-        m[3][10] = 4;
-        m[15][6] = 4;
-        m[11][25] = 4;
-        m[15][20] = 4;
-        m[7][6] = 4;
+        // Torre derecha
+        for (let c = 21; c <= 30; c++) m[17][c] = 1;
+        for (let c = 22; c <= 30; c++) m[12][c] = 1;
+        for (let c = 23; c <= 30; c++) m[6][c] = 1;
+
+        // Escaleras diagonales de 2 columnas
+        ChamberLevels.addDiagonalStair(m, 3, 16, 19, 1);   // Base izq <-> fila 16
+        ChamberLevels.addDiagonalStair(m, 7, 11, 15, -1);  // Fila 16 <-> fila 11
+        ChamberLevels.addDiagonalStair(m, 5, 6, 10, 1);    // Fila 11 <-> fila 6
+        ChamberLevels.addDiagonalStair(m, 14, 14, 19, 1);  // Base centro <-> ciudadela fila 14
+        ChamberLevels.addDiagonalStair(m, 12, 8, 13, 1);   // Fila 14 <-> bóveda fila 8
+        ChamberLevels.addDiagonalStair(m, 26, 17, 19, -1); // Base der <-> fila 17
+        ChamberLevels.addDiagonalStair(m, 23, 12, 16, 1);  // Fila 17 <-> fila 12
+        ChamberLevels.addDiagonalStair(m, 27, 6, 11, -1);  // Fila 12 <-> fila 6
+
+        // Coleccionables
+        m[5][4] = 4;   // Gema rosa en torre sup-izq
+        m[7][16] = 4;  // Gema verde dentro de la bóveda sellada central
+        m[11][27] = 4; // Gema azul en torre der
+        m[19][2] = 4;  // Gema amarilla tras muro divisorio izq
+        m[19][8] = 4;  // Pico en base izq
+        m[13][13] = 4; // Pico en ciudadela
+        m[16][23] = 4; // Pico en torre der
+        m[10][2] = 4;  // Pico en torre izq
+        m[19][20] = 4; // Cuchillo en base centro
+        m[13][19] = 4; // Cuchillo en ciudadela
 
         return ChamberLevels.parseReferenceMatrix(m, {
             stage: 3,
             name: 'PYRAMID-03 - LABYRINTH OF ANUBIS',
-            playerSpawn: { col: 3, row: 15 },
-            exitDoor: { col: 28, row: 3 },
+            playerSpawn: { col: 15, row: 13 },
+            exitDoor: { col: 24, row: 5 },
+            diggableCells: diggable,
+            itemKinds: {
+                '4,5': { kind: 'gem', gemColor: 'pink' },
+                '16,7': { kind: 'gem', gemColor: 'green' },
+                '27,11': { kind: 'gem', gemColor: 'blue' },
+                '2,19': { kind: 'gem', gemColor: 'yellow' },
+                '8,19': { kind: 'pickaxe' },
+                '13,13': { kind: 'pickaxe' },
+                '23,16': { kind: 'pickaxe' },
+                '2,10': { kind: 'pickaxe' },
+                '20,19': { kind: 'knife' },
+                '19,13': { kind: 'knife' }
+            },
+            extraMummies: [
+                { col: 25, row: 16, type: 'white' },
+                { col: 16, row: 13, type: 'yellow' },
+                { col: 25, row: 11, type: 'red' },
+                { col: 4, row: 10, type: 'red' }
+            ],
+            movingFloors: [
+                { col: 16, row: 14, length: 4, direction: 'right', speed: 80 },
+                { col: 25, row: 12, length: 4, direction: 'left', speed: 80 }
+            ]
+        });
+    }
+
+    /**
+     * PYRAMID-04: Embudo invertido de Horus en forma de V con cámara subterránea central.
+     */
+    private static createChamber4(): ChamberData {
+        const m = ChamberLevels.createEmptyReferenceMatrix();
+        const diggable: Array<{ col: number; row: number }> = [];
+
+        // Alas superiores (fila 5)
+        for (let c = 1; c <= 11; c++) m[5][c] = 1;
+        for (let c = 20; c <= 30; c++) m[5][c] = 1;
+
+        // Terrazas medias convergentes (fila 9)
+        for (let c = 5; c <= 13; c++) m[9][c] = 1;
+        for (let c = 18; c <= 26; c++) m[9][c] = 1;
+
+        // Corazón central (fila 13)
+        for (let c = 10; c <= 21; c++) m[13][c] = 1;
+
+        // Alas inferiores divergentes (fila 17)
+        for (let c = 3; c <= 11; c++) m[17][c] = 1;
+        for (let c = 20; c <= 28; c++) m[17][c] = 1;
+
+        // Cámara central inferior excavable (fila 18 techo, fila 19 muros)
+        for (let c = 14; c <= 17; c++) m[18][c] = 1;
+        for (const c of [14, 17]) {
+            m[19][c] = 1;
+            diggable.push({ col: c, row: 19 });
+        }
+
+        // Escaleras simétricas en V
+        ChamberLevels.addDiagonalStair(m, 8, 5, 8, 1);    // Fila 5 izq <-> fila 9 izq
+        ChamberLevels.addDiagonalStair(m, 22, 5, 8, -1);  // Fila 5 der <-> fila 9 der
+        ChamberLevels.addDiagonalStair(m, 10, 9, 12, 1);  // Fila 9 izq <-> corazón fila 13
+        ChamberLevels.addDiagonalStair(m, 20, 9, 12, -1); // Fila 9 der <-> corazón fila 13
+        ChamberLevels.addDiagonalStair(m, 12, 13, 16, -1);// Corazón <-> fila 17 izq
+        ChamberLevels.addDiagonalStair(m, 18, 13, 16, 1); // Corazón <-> fila 17 der
+        ChamberLevels.addDiagonalStair(m, 5, 17, 19, 1);  // Fila 17 izq <-> base
+        ChamberLevels.addDiagonalStair(m, 25, 17, 19, -1);// Fila 17 der <-> base
+
+        // Coleccionables
+        m[19][15] = 4; // Gema rosa en cámara central inferior
+        m[8][6] = 4;   // Gema verde en terraza media izq
+        m[8][25] = 4;  // Gema azul en terraza media der
+        m[16][4] = 4;  // Gema amarilla en ala inf-izq
+        m[4][6] = 4;   // Pico en ala sup-izq
+        m[12][15] = 4; // Pico en corazón central
+        m[16][27] = 4; // Pico en ala inf-der
+        m[19][3] = 4;  // Cuchillo abajo izq
+        m[4][23] = 4;  // Cuchillo arriba der
+
+        return ChamberLevels.parseReferenceMatrix(m, {
+            stage: 4,
+            name: 'PYRAMID-04 - TOMB OF HORUS',
+            playerSpawn: { col: 3, row: 4 },
+            exitDoor: { col: 28, row: 4 },
             diggableCells: diggable,
             itemKinds: {
                 '15,19': { kind: 'gem', gemColor: 'pink' },
-                '27,15': { kind: 'gem', gemColor: 'green' },
-                '4,11': { kind: 'gem', gemColor: 'blue' },
-                '18,7': { kind: 'gem', gemColor: 'yellow' },
-                '10,3': { kind: 'gem', gemColor: 'pink' },
-                '6,15': { kind: 'pickaxe' },
-                '25,11': { kind: 'pickaxe' },
-                '20,15': { kind: 'knife' },
-                '6,7': { kind: 'knife' }
+                '6,8': { kind: 'gem', gemColor: 'green' },
+                '25,8': { kind: 'gem', gemColor: 'blue' },
+                '4,16': { kind: 'gem', gemColor: 'yellow' },
+                '6,4': { kind: 'pickaxe' },
+                '15,12': { kind: 'pickaxe' },
+                '27,16': { kind: 'pickaxe' },
+                '3,19': { kind: 'knife' },
+                '23,4': { kind: 'knife' }
             },
             extraMummies: [
-                { col: 22, row: 15, type: 'white' },
-                { col: 19, row: 11, type: 'yellow' },
-                { col: 14, row: 7, type: 'red' },
-                { col: 22, row: 3, type: 'red' }
-            ],
-            movingFloors: [
-                { col: 10, row: 12, length: 4, direction: 'right', speed: 80 },
-                { col: 14, row: 8, length: 4, direction: 'left', speed: 80 }
+                { col: 22, row: 8, type: 'white' },
+                { col: 14, row: 12, type: 'yellow' },
+                { col: 22, row: 19, type: 'red' }
+            ]
+        });
+    }
+
+    /**
+     * PYRAMID-05: Santuario de Ra con islas flotantes alternadas y jaulas elevadas.
+     */
+    private static createChamber5(): ChamberData {
+        const m = ChamberLevels.createEmptyReferenceMatrix();
+        const diggable: Array<{ col: number; row: number }> = [];
+
+        // Nivel 1: Tres islas bajas (fila 17)
+        for (let c = 2; c <= 8; c++) m[17][c] = 1;
+        for (let c = 13; c <= 18; c++) m[17][c] = 1;
+        for (let c = 23; c <= 29; c++) m[17][c] = 1;
+
+        // Nivel 2: Dos puentes intermedios (fila 13)
+        for (let c = 6; c <= 13; c++) m[13][c] = 1;
+        for (let c = 18; c <= 25; c++) m[13][c] = 1;
+
+        // Nivel 3: Tres plataformas altas (fila 9)
+        for (let c = 1; c <= 7; c++) m[9][c] = 1;
+        for (let c = 12; c <= 19; c++) m[9][c] = 1;
+        for (let c = 24; c <= 30; c++) m[9][c] = 1;
+
+        // Nivel 4: Corona de Ra superior (fila 5)
+        for (let c = 8; c <= 23; c++) m[5][c] = 1;
+
+        // Jaula excavable bajo la corona (fila 6..8, cols 14 y 17)
+        for (const c of [14, 17]) {
+            m[6][c] = 1;
+            m[7][c] = 1;
+            m[8][c] = 1;
+            diggable.push({ col: c, row: 7 }, { col: c, row: 8 });
+        }
+
+        // Escaleras en zigzag entre islas
+        ChamberLevels.addDiagonalStair(m, 4, 17, 19, 1);  // Base <-> isla inf-izq
+        ChamberLevels.addDiagonalStair(m, 15, 17, 19, -1);// Base <-> isla inf-centro
+        ChamberLevels.addDiagonalStair(m, 26, 17, 19, -1);// Base <-> isla inf-der
+        ChamberLevels.addDiagonalStair(m, 9, 13, 16, -1); // Fila 17 izq <-> fila 13 izq
+        ChamberLevels.addDiagonalStair(m, 21, 13, 16, 1); // Fila 17 der <-> fila 13 der
+        ChamberLevels.addDiagonalStair(m, 4, 9, 12, 1);   // Fila 13 izq <-> fila 9 izq
+        ChamberLevels.addDiagonalStair(m, 14, 9, 12, -1); // Fila 13 izq <-> fila 9 centro
+        ChamberLevels.addDiagonalStair(m, 26, 9, 12, -1); // Fila 13 der <-> fila 9 der
+        ChamberLevels.addDiagonalStair(m, 10, 5, 8, 1);   // Fila 9 centro <-> corona fila 5
+        ChamberLevels.addDiagonalStair(m, 20, 5, 8, 1);   // Fila 9 der <-> corona fila 5
+
+        // Coleccionables
+        m[8][15] = 4;  // Gema rosa dentro de la jaula central
+        m[8][2] = 4;   // Gema verde en isla sup-izq
+        m[8][28] = 4;  // Gema azul en isla sup-der
+        m[16][15] = 4; // Gema amarilla en isla inf-centro
+        m[16][3] = 4;  // Pico en isla inf-izq
+        m[12][20] = 4; // Pico en puente der
+        m[4][10] = 4;  // Pico en corona
+        m[19][20] = 4; // Cuchillo abajo
+        m[12][8] = 4;  // Cuchillo en puente izq
+
+        return ChamberLevels.parseReferenceMatrix(m, {
+            stage: 5,
+            name: 'PYRAMID-05 - SANCTUM OF RA',
+            playerSpawn: { col: 16, row: 19 },
+            exitDoor: { col: 15, row: 4 },
+            diggableCells: diggable,
+            itemKinds: {
+                '15,8': { kind: 'gem', gemColor: 'pink' },
+                '2,8': { kind: 'gem', gemColor: 'green' },
+                '28,8': { kind: 'gem', gemColor: 'blue' },
+                '15,16': { kind: 'gem', gemColor: 'yellow' },
+                '3,16': { kind: 'pickaxe' },
+                '20,12': { kind: 'pickaxe' },
+                '10,4': { kind: 'pickaxe' },
+                '20,19': { kind: 'knife' },
+                '8,12': { kind: 'knife' }
+            },
+            extraMummies: [
+                { col: 25, row: 16, type: 'white' },
+                { col: 10, row: 12, type: 'yellow' },
+                { col: 27, row: 8, type: 'red' },
+                { col: 18, row: 4, type: 'red' }
             ]
         });
     }
